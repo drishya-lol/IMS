@@ -18,7 +18,7 @@ class Product(models.Model):
     image = models.FileField()
     description = models.TextField()
     category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True)
-    department = models.ManyToManyField('Department', null=True, blank=True)
+    department = models.ManyToManyField('Department', blank=True)
     stock = models.IntegerField()
     
 class Purchase(models.Model):

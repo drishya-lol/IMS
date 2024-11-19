@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from base.views import ProductApiView, ProductTypeApiView, ProductTypeIdApiView
+from base.views import ProductApiView, ProductTypeApiView, ProductTypeIdApiView, PurchaseApiView, SellApiView, DepartmentApiView, VendorApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +24,12 @@ urlpatterns = [
     path('product/<int:pk>/', ProductApiView.as_view({'get': 'retrieve', 'put': 'update', 'patch':'partial_update', 'delete': 'destroy'})),
     path('productcategory/', ProductTypeApiView.as_view()),
     path('productcategory/<int:pk>', ProductTypeIdApiView.as_view()),
+    path('purchases/', PurchaseApiView.as_view(), name='purchase-list'),
+    path('purchases/<int:pk>/', PurchaseApiView.as_view(), name='purchase-detail'),
+    path('sells/', SellApiView.as_view(), name='sell-list'),
+    path('sells/<int:pk>/', SellApiView.as_view(), name='sell-detail'),
+    path('departments/', DepartmentApiView.as_view(), name='department-list'),
+    path('departments/<int:pk>/', DepartmentApiView.as_view(), name='department-detail'),
+    path('vendors/', VendorApiView.as_view(), name='vendor-list'),
+    path('vendors/<int:pk>/', VendorApiView.as_view(), name='vendor-detail'),
 ]
