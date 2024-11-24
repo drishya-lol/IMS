@@ -2,19 +2,26 @@ from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import GenericAPIView
 from .models import Product, ProductCategory, Department, Vendor, Purchase, Sell
-from .serializers import ProductSerializer, ProductCategorySerializer, DepartmentSerializer, VendorSerializer, PurchaseSerializer, SellSerializer
+from .serializers import ProductSerializer, ProductCategorySerializer, DepartmentSerializer, VendorSerializer, PurchaseSerializer, SellSerializer, UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view #fuctions based api view
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
     
 class ProductTypeApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         productCategoryObjects = self.get_queryset()
@@ -32,6 +39,7 @@ class ProductTypeApiView(GenericAPIView):
 class ProductTypeIdApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
         # ProductCategory.objects.get(id=pk)
@@ -56,6 +64,7 @@ class ProductTypeIdApiView(GenericAPIView):
 class PurchaseApiView(GenericAPIView):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
         if pk:  # Retrieve a specific purchase
@@ -93,6 +102,7 @@ class PurchaseApiView(GenericAPIView):
 class SellApiView(GenericAPIView):
     queryset = Sell.objects.all()
     serializer_class = SellSerializer
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request, pk=None):
         if pk:  # Retrieve a specific sell record
@@ -130,6 +140,7 @@ class SellApiView(GenericAPIView):
 class DepartmentApiView(GenericAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
         if pk:  # Retrieve a specific department
@@ -167,6 +178,7 @@ class DepartmentApiView(GenericAPIView):
 class VendorApiView(GenericAPIView):
     queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
         if pk:  # Retrieve a specific vendor
@@ -199,3 +211,29 @@ class VendorApiView(GenericAPIView):
         vendorObj = get_object_or_404(self.get_queryset(), pk=pk)
         vendorObj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST']) #which requests are allowed
+def register(request):
+    password = request.data.get('password')
+    hash_password = make_password(password)
+    data = request.data.copy()
+    data['password'] = hash_password
+    serializer = UserSerializer(data = data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors)
+
+@api_view(['POST']) #which requests are allowed
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    user = authenticate(username=username, password=password)
+    
+    if user == None:
+        return Response("Invalid Credentials", status = status.HTTP_400_BAD_REQUEST)
+    else:
+        token,_ = Token.objects.get_or_create(user=user)
+        return Response(token.key, status = status.HTTP_200_OK)
