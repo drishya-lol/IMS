@@ -16,7 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from base.views import ProductApiView, ProductCategoryApiView, DepartmentApiView, VendorApiView, PurchaseApiView, SellApiView, ProductCategoryIdApiView, register
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('product/', ProductApiView.as_view({'get': 'list', 'post': 'create'})),
+    path('product/<int:pk>/', ProductApiView.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('productcategory/', ProductCategoryApiView.as_view()),
+    path('productcategory/<int:pk>/', ProductCategoryIdApiView.as_view()),
+    path('purchases/', PurchaseApiView.as_view({'get': 'list', 'post': 'create'})),
+    path('sells/', SellApiView.as_view({'get': 'list', 'post': 'create'})),
+    path('departments/', DepartmentApiView.as_view({'get': 'list', 'post': 'create'})),
+    path('vendors/', VendorApiView.as_view({'get': 'list', 'post': 'create'})),
+    path('register/', register),
 ]
