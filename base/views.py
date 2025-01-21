@@ -1,22 +1,25 @@
 from django.shortcuts import render
+from .models import Product, ProductCategory, Department, Vendor, Purchase, Sell
+from .serializer import ProductSerializer, ProductCategorySerializer, DepartmentSerializer, UserSerializer, VendorSerializer, PurchaseSerializer, SellSerializer
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-from .models import Product, ProductCategory, Department, Vendor, Purchase, Sell
-from .serializer import ProductSerializer, ProductCategorySerializer, DepartmentSerializer, UserSerializer, VendorSerializer, PurchaseSerializer, SellSerializer
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
     
 class ProductCategoryApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         productTypeObjs = self.get_queryset()
@@ -34,6 +37,7 @@ class ProductCategoryApiView(GenericAPIView):
 class ProductCategoryIdApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
         productTypeObj = self.get_object()                  #ProductCategory.objects.get(pk=pk)
@@ -57,18 +61,22 @@ class ProductCategoryIdApiView(GenericAPIView):
 class DepartmentApiView(ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
+    permission_classes = [IsAuthenticated]
     
 class VendorApiView(ModelViewSet):
     queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
+    permission_classes = [IsAuthenticated]
     
 class PurchaseApiView(ModelViewSet):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
+    permission_classes = [IsAuthenticated]
     
 class SellApiView(ModelViewSet):
     queryset = Sell.objects.all()
     serializer_class = SellSerializer
+    permission_classes = [IsAuthenticated]
     
 @api_view(['POST'])
 def register(request):
@@ -91,5 +99,6 @@ def login(request):
     if user == None:
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        Token.objects.create(user=user)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response(token.key)
     
