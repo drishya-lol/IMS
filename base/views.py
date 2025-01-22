@@ -9,18 +9,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, DjangoModelPermissions
 from django.contrib.auth.models import Group
 # Create your views here.
 class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     
 class ProductCategoryApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     
     def get(self, request):
         productTypeObjs = self.get_queryset()
@@ -38,7 +38,7 @@ class ProductCategoryApiView(GenericAPIView):
 class ProductCategoryIdApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     
     def get(self, request, pk):
         productTypeObj = self.get_object()                  #ProductCategory.objects.get(pk=pk)
@@ -79,20 +79,25 @@ class SellApiView(ModelViewSet):
     serializer_class = SellSerializer
     permission_classes = [IsAuthenticated]
     
-# @api_view(['POST'])
-# def register(request):
-#     password = request.data.get('password')
-#     hashed_password = make_password(password)
-#     data = request.data.copy()
-#     data['password'] = hashed_password
-#     serializer = UserSerializer(data=data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data)
-#     else:
-#         return Response(serializer.errors)
-
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def registerEmployee(request):
+    if request.user.groups.name == 'Management':
+        employeeGroup = Group.objects.get(name='Employee')
+        password = request.data.get('password')
+        hashed_password = make_password(password)
+        data = request.data.copy()
+        data['password'] = hashed_password
+        data['groups'] = employeeGroup.id
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+    else:
+        return Response('Permission Denied', status=status.HTTP_403_FORBIDDEN)
+                        
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def registerManagemenet(request):
