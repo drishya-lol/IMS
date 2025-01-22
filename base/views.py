@@ -7,9 +7,10 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.contrib.auth.models import Group
 # Create your views here.
 class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
@@ -78,12 +79,29 @@ class SellApiView(ModelViewSet):
     serializer_class = SellSerializer
     permission_classes = [IsAuthenticated]
     
+# @api_view(['POST'])
+# def register(request):
+#     password = request.data.get('password')
+#     hashed_password = make_password(password)
+#     data = request.data.copy()
+#     data['password'] = hashed_password
+#     serializer = UserSerializer(data=data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data)
+#     else:
+#         return Response(serializer.errors)
+
+
 @api_view(['POST'])
-def register(request):
+@permission_classes([IsAdminUser])
+def registerManagemenet(request):
+    managementGroup = Group.objects.get(name='Management')
     password = request.data.get('password')
     hashed_password = make_password(password)
     data = request.data.copy()
     data['password'] = hashed_password
+    data['groups'] = managementGroup.id
     serializer = UserSerializer(data=data)
     if serializer.is_valid():
         serializer.save()

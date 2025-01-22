@@ -34,4 +34,4 @@ class SellSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'image', 'address', 'contact']
+        fields = ['username', 'password', 'email', 'groups', 'image', 'address', 'contact']
