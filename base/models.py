@@ -26,6 +26,9 @@ class Product(models.Model):
     department = models.ManyToManyField('Department', blank=True)
     stock = models.IntegerField()
     
+    def __str__(self):
+        return self.name
+    
 class Purchase(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     price = models.FloatField()

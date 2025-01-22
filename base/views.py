@@ -16,6 +16,8 @@ class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    filterset_fields = ['category', 'department']
+    search_fields = ['name', 'description']
     
 class ProductCategoryApiView(GenericAPIView):
     queryset = ProductCategory.objects.all()
