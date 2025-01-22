@@ -26,8 +26,11 @@ class ProductCategoryApiView(GenericAPIView):
     
     def get(self, request):
         productTypeObjs = self.get_queryset()
-        serializer = self.get_serializer(productTypeObjs, many=True)
-        return Response(serializer.data)
+        filter_data = self.filter_queryset(productTypeObjs)
+        paginated_data = self.paginate_queryset(filter_data)
+        serializer = self.get_serializer(paginated_data, many=True)
+        response = self.get_paginated_response(serializer.data)
+        return Response(response)
     
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
